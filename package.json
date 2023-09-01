@@ -1,0 +1,43 @@
+{
+	"name": "@wasm-fmt/zig_fmt",
+	"version": "0.0.0",
+	"description": "A wasm based zig formatter",
+	"scripts": {
+		"prepack": "npm run build",
+		"build": "zig build -Dtarget=wasm32-wasi -Doptimize=ReleaseSmall",
+		"postbuild": "cp zig-out/bin/zig_fmt.wasm ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/wasm-fmt/zig_fmt.git"
+	},
+	"keywords": [
+		"wasm",
+		"zig",
+		"formatter"
+	],
+	"author": "magic-akari <akari.ccino@gamil.com>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/wasm-fmt/zig_fmt/issues"
+	},
+	"homepage": "https://github.com/wasm-fmt/zig_fmt#readme",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "zig_fmt.js",
+	"types": "zig_fmt.d.ts",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./zif_fmt.d.ts",
+			"default": "./zif_fmt.js"
+		},
+		"./vite": {
+			"types": "./zif_fmt.d.ts",
+			"default": "./vite.js"
+		},
+		"./package.json": "./package.json",
+		"./*": "./*"
+	}
+}

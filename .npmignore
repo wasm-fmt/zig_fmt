@@ -1,0 +1,6 @@
+zig-out
+zig-cache
+src
+*.zig
+*.tgz
+.*
