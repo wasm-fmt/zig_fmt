@@ -1,0 +1,55 @@
+name: Test
+
+on:
+    - push
+    - pull_request
+
+jobs:
+    zig-fmt:
+        name: Zig fmt
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: goto-bus-stop/setup-zig@v2
+            - run: zig fmt --check src/*.zig
+
+    zig-test:
+        name: Zig test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: goto-bus-stop/setup-zig@v2
+            - run: zig build test
+
+    wasm-test:
+        name: Wasm test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: goto-bus-stop/setup-zig@v2
+
+            - uses: actions/setup-node@v3
+              with:
+                  node-version-file: ".node-version"
+
+            - name: Build wasm
+              run: npm run build
+
+            - name: Node Test
+              run: node --test
+
+            - uses: denoland/setup-deno@v1
+              with:
+                  deno-version: v1.x
+
+            - name: Deno Test
+              run: deno test --allow-read
+
+            - name: Package
+              run: npm pack
+
+            - name: Upload
+              uses: actions/upload-artifact@v3
+              with:
+                  name: npm
+                  path: wasm-fmt-zig_fmt-*.tgz

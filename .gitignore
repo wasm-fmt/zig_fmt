@@ -1,5 +1,6 @@
 zig-out
 zig-cache
+node_modules
 *.wasm
 *.tgz
 .DS_Store

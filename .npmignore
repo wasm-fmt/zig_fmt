@@ -1,6 +1,8 @@
 zig-out
 zig-cache
+test_*
 src
+node_modules
 *.zig
 *.tgz
 .*
