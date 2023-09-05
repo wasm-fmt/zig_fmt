@@ -9,7 +9,7 @@ jobs:
         name: Zig fmt
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - uses: goto-bus-stop/setup-zig@v2
             - run: zig fmt --check src/*.zig
 
@@ -17,7 +17,7 @@ jobs:
         name: Zig test
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - uses: goto-bus-stop/setup-zig@v2
             - run: zig build test
 
@@ -25,7 +25,7 @@ jobs:
         name: Wasm test
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - uses: goto-bus-stop/setup-zig@v2
 
             - uses: actions/setup-node@v3
