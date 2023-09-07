@@ -31,11 +31,11 @@ for await (const dirent of await fs.opendir(test_root, { recursive: true })) {
 		fs.readFile(input_path, "utf-8"),
 		fs.readFile(expect_path, "utf-8"),
 	]);
-	const actual = format(input);
 
 	const test_name = path.relative(test_root, input_path);
 
 	test(test_name, () => {
+		const actual = format(input);
 		assert.equal(actual, expected);
 	});
 }

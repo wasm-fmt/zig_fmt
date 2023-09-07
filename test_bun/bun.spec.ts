@@ -39,9 +39,8 @@ for await (const input_path of walk(test_root)) {
         Bun.file(input_path.replace(ext, ".expect")).text(),
     ]);
 
-    const actual = format(input);
-
     test(test_name, () => {
+        const actual = format(input);
         expect(actual).toBe(expected);
     });
 }
