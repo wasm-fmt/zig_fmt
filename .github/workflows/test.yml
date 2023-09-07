@@ -21,7 +21,7 @@ jobs:
             - uses: goto-bus-stop/setup-zig@v2
             - run: zig build test
 
-    wasm-test:
+    wasm-build:
         name: Wasm test
         runs-on: ubuntu-latest
         steps:
@@ -38,18 +38,62 @@ jobs:
             - name: Node Test
               run: node --test
 
-            - uses: denoland/setup-deno@v1
-              with:
-                  deno-version: v1.x
-
-            - name: Deno Test
-              run: deno test --allow-read
-
             - name: Package
               run: npm pack
 
             - name: Upload
               uses: actions/upload-artifact@v3
               with:
-                  name: npm
-                  path: wasm-fmt-zig_fmt-*.tgz
+                  name: build
+                  path: |
+                      wasm-fmt-zig_fmt-*.tgz
+                      zig_fmt.wasm
+
+    node-test:
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/download-artifact@v3
+              with:
+                  name: build
+                  path: ./
+
+            - uses: actions/setup-node@v3
+              name: Install Node
+              with:
+                  node-version-file: ".node-version"
+
+            - run: node --test
+
+    deno-test:
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/download-artifact@v3
+              with:
+                  name: build
+                  path: ./
+
+            - uses: denoland/setup-deno@v1
+              name: Install Deno
+              with:
+                  deno-version: v1.x
+
+            - run: deno test --allow-read
+
+    bun-test:
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/download-artifact@v3
+              with:
+                  name: build
+                  path: ./
+
+            - uses: oven-sh/setup-bun@v1
+              name: Install bun
+
+            - run: bun test test_bun

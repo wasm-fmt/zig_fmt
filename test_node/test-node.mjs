@@ -1,27 +1,20 @@
-import init, { format } from "../zig_fmt.js";
-import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import init, { format } from "../zig_fmt.js";
 
 await init();
 
-/**
- * @param {string} dir
- * @returns {Generator<string>}
- */
-async function* walk(dir) {
-	for await (const d of await fs.opendir(dir)) {
-		const entry = path.join(dir, d.name);
-		if (d.isDirectory()) yield* walk(entry);
-		else if (d.isFile()) yield entry;
-	}
-}
-
 const test_root = fileURLToPath(new URL("../test_data", import.meta.url));
 
-for await (const input_path of walk(test_root)) {
+for await (const dirent of await fs.opendir(test_root, { recursive: true })) {
+	if (!dirent.isFile()) {
+		continue;
+	}
+
+	const input_path = dirent.path;
 	const ext = path.extname(input_path);
 
 	switch (ext) {
@@ -32,13 +25,15 @@ for await (const input_path of walk(test_root)) {
 			continue;
 	}
 
-	const test_name = path.relative(test_root, input_path);
-	const [input, expected] = await Promise.all([
-		fs.readFile(input_path, { encoding: "utf-8" }),
-		fs.readFile(input_path.replace(ext, ".expect"), { encoding: "utf-8" }),
-	]);
+	const expect_path = input_path.replace(ext, ".expect");
 
-	const actual = format(input, input_path);
+	const [input, expected] = await Promise.all([
+		fs.readFile(input_path, "utf-8"),
+		fs.readFile(expect_path, "utf-8"),
+	]);
+	const actual = format(input);
+
+	const test_name = path.relative(test_root, input_path);
 
 	test(test_name, () => {
 		assert.equal(actual, expected);
