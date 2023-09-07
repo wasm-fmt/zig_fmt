@@ -22,7 +22,7 @@ jobs:
             - run: zig build test
 
     wasm-build:
-        name: Wasm test
+        name: Wasm build
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
 
     node-test:
         runs-on: ubuntu-latest
-        needs: build
+        needs: wasm-build
         steps:
             - uses: actions/checkout@v4
             - uses: actions/download-artifact@v3
@@ -68,7 +68,7 @@ jobs:
 
     deno-test:
         runs-on: ubuntu-latest
-        needs: build
+        needs: wasm-build
         steps:
             - uses: actions/checkout@v4
             - uses: actions/download-artifact@v3
@@ -85,7 +85,7 @@ jobs:
 
     bun-test:
         runs-on: ubuntu-latest
-        needs: build
+        needs: wasm-build
         steps:
             - uses: actions/checkout@v4
             - uses: actions/download-artifact@v3
