@@ -30,11 +30,11 @@
 	"type": "module",
 	"exports": {
 		".": {
-			"types": "./zif_fmt.d.ts",
-			"default": "./zif_fmt.js"
+			"types": "./zig_fmt.d.ts",
+			"default": "./zig_fmt.js"
 		},
 		"./vite": {
-			"types": "./zif_fmt.d.ts",
+			"types": "./zig_fmt.d.ts",
 			"default": "./vite.js"
 		},
 		"./package.json": "./package.json",
