@@ -7,20 +7,8 @@ export default async function init(input) {
 		input = new URL("zig_fmt.wasm", import.meta.url);
 	}
 
-	switch (true) {
-		case typeof input === "string":
-			input = new URL(input, import.meta.url);
-		case input instanceof URL:
-			if (
-				typeof __webpack_require__ !== "function" &&
-				input.protocol === "file:"
-			) {
-				const fs = await import("node:fs/promises");
-				input = fs.readFile(input);
-				break;
-			}
-		case typeof Request === "function" && input instanceof Request:
-			input = fetch(input);
+	if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
+		input = fetch(input);
 	}
 
 	const imports = get_imports();
