@@ -1,3 +1,4 @@
+/* @ts-self-types="./zig_fmt.d.ts" */
 let wasm;
 
 export default async function init(input) {
