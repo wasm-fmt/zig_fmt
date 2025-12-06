@@ -5,10 +5,15 @@ pub fn build(b: *std.Build) void {
         .name = "zig_fmt",
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/main.zig"),
-            .target = b.standardTargetOptions(.{}),
-            .optimize = b.standardOptimizeOption(.{}),
+            .target = b.resolveTargetQuery(.{
+                .cpu_arch = .wasm32,
+                .os_tag = .freestanding,
+            }),
+            .optimize = .ReleaseSmall,
         }),
     });
+    exe.entry = .disabled;
+    exe.rdynamic = true;
 
     b.installArtifact(exe);
 }
