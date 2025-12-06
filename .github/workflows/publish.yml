@@ -42,6 +42,37 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  publish-jsr:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: mlugg/setup-zig@v2
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+
+      - run: npm run build
+
+      - name: Generate jsr.json from package.json
+        run: |
+          node -e "
+          const pkg = require('./package.json');
+          const jsr = {
+            name: '@fmt/zig-fmt',
+            version: pkg.version,
+            exports: './zig_fmt.js',
+            exclude: ['!**', '*.tgz']
+          };
+          require('fs').writeFileSync('jsr.json', JSON.stringify(jsr, null, '\t') + '\n');
+          "
+
+      - run: npx jsr publish --allow-dirty
+
   publish-github-release:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
