@@ -6,8 +6,6 @@ import { relative } from "https://deno.land/std@0.201.0/path/mod.ts";
 
 await init();
 
-const update = Deno.args.includes("--update");
-
 const test_root = new URL("../test_data", import.meta.url);
 
 for await (const entry of walk(test_root, {
@@ -17,17 +15,12 @@ for await (const entry of walk(test_root, {
 	const expect_path = entry.path.replace(/input$/, "expect");
 	const input = Deno.readTextFileSync(entry.path);
 
-	if (update) {
+	const expected = Deno.readTextFileSync(expect_path);
+
+	const test_name = relative(test_root.pathname, entry.path);
+
+	Deno.test(test_name, () => {
 		const actual = format(input);
-		Deno.writeTextFileSync(expect_path, actual);
-	} else {
-		const expected = Deno.readTextFileSync(expect_path);
-
-		const test_name = relative(test_root.pathname, entry.path);
-
-		Deno.test(test_name, () => {
-			const actual = format(input);
-			assertEquals(actual, expected);
-		});
-	}
+		assertEquals(actual, expected);
+	});
 }
