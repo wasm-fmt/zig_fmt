@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: goto-bus-stop/setup-zig@v2
+      - uses: mlugg/setup-zig@v2
       - run: zig fmt --check src/*.zig
 
   zig-test:
@@ -22,7 +22,7 @@ jobs:
     if: false
     steps:
       - uses: actions/checkout@v4
-      - uses: goto-bus-stop/setup-zig@v2
+      - uses: mlugg/setup-zig@v2
       - run: zig build test
 
   wasm-build:
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: goto-bus-stop/setup-zig@v2
+      - uses: mlugg/setup-zig@v2
 
       - uses: actions/setup-node@v4
         with:
@@ -40,7 +40,7 @@ jobs:
         run: npm run build
 
       - name: Node Test
-        run: node --test
+        run: node --test "test_node/*.mjs"
 
       - name: Package
         run: npm pack
@@ -68,7 +68,7 @@ jobs:
         with:
           node-version-file: ".node-version"
 
-      - run: node --test
+      - run: node --test "test_node/*.mjs"
 
   deno-test:
     runs-on: ubuntu-latest
