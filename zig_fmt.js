@@ -59,6 +59,7 @@ const encoder = new TextEncoder();
 
 const WASI_ESUCCESS = 0;
 const WASI_EBADF = 8;
+const WASI_ESPIPE = 29;
 
 function get_imports() {
 	return {
@@ -92,6 +93,64 @@ function get_imports() {
 
 				const nread = fds[fd].fd_read(buffer8, iovecs);
 				buffer.setUint32(nread_ptr, nread, true);
+				return WASI_ESUCCESS;
+			},
+			fd_pread(fd, iovs_ptr, iovs_len, offset, nread_ptr) {
+				if (fd !== 0) {
+					return WASI_EBADF;
+				}
+
+				const buffer = new DataView(wasm.memory.buffer);
+				const buffer8 = new Uint8Array(wasm.memory.buffer);
+
+				const iovecs = read_bytes_array(buffer, iovs_ptr, iovs_len);
+
+				// Save position, seek to offset, read, restore position
+				const saved_position = fds[fd].position;
+				fds[fd].position = Number(offset);
+				const nread = fds[fd].fd_read(buffer8, iovecs);
+				fds[fd].position = saved_position;
+
+				buffer.setUint32(nread_ptr, nread, true);
+				return WASI_ESUCCESS;
+			},
+			fd_pwrite(fd, iovs_ptr, iovs_len, offset, nwritten_ptr) {
+				if (fd !== 1 && fd !== 2) {
+					return WASI_EBADF;
+				}
+
+				const buffer = new DataView(wasm.memory.buffer);
+				const buffer8 = new Uint8Array(wasm.memory.buffer);
+
+				const iovecs = read_bytes_array(buffer, iovs_ptr, iovs_len);
+
+				const nwritten = fds[fd].fd_write(buffer8, iovecs);
+				buffer.setUint32(nwritten_ptr, nwritten, true);
+				return WASI_ESUCCESS;
+			},
+			fd_seek(fd, offset, whence, newoffset_ptr) {
+				// stdin/stdout/stderr are not seekable
+				if (fd <= 2) {
+					return WASI_ESPIPE;
+				}
+				return WASI_EBADF;
+			},
+			fd_filestat_get(fd, buf_ptr) {
+				if (fd > 2) {
+					return WASI_EBADF;
+				}
+
+				const buffer = new DataView(wasm.memory.buffer);
+				// filestat structure (64 bytes):
+				// dev: u64, ino: u64, filetype: u8, nlink: u64, size: u64, atim: u64, mtim: u64, ctim: u64
+				buffer.setBigUint64(buf_ptr, 0n, true); // dev
+				buffer.setBigUint64(buf_ptr + 8, 0n, true); // ino
+				buffer.setUint8(buf_ptr + 16, fd === 0 ? 2 : 2); // filetype: character device
+				buffer.setBigUint64(buf_ptr + 24, 1n, true); // nlink
+				buffer.setBigUint64(buf_ptr + 32, BigInt(fds[fd].data?.length ?? 0), true); // size
+				buffer.setBigUint64(buf_ptr + 40, 0n, true); // atim
+				buffer.setBigUint64(buf_ptr + 48, 0n, true); // mtim
+				buffer.setBigUint64(buf_ptr + 56, 0n, true); // ctim
 				return WASI_ESUCCESS;
 			},
 			proc_exit(rval) {

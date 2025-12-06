@@ -6,14 +6,14 @@ pub fn main() !void {
     const arena = arena_instance.allocator();
     const gpa = arena;
 
-    const stdin = std.io.getStdIn();
-    const source_code = try std.zig.readSourceFileToEndAlloc(gpa, stdin, null);
+    var stdin = std.fs.File.stdin().reader(&.{});
+    const source_code = try std.zig.readSourceFileToEndAlloc(gpa, &stdin);
     defer gpa.free(source_code);
 
     var tree = try std.zig.Ast.parse(gpa, source_code, .zig);
     defer tree.deinit(gpa);
 
-    const formatted = try tree.render(gpa);
-    defer gpa.free(formatted);
-    return std.io.getStdOut().writeAll(formatted);
+    var stdout = std.fs.File.stdout().writer(&.{});
+    try tree.render(gpa, &stdout.interface, .{});
+    try stdout.interface.flush();
 }
