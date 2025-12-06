@@ -58,7 +58,7 @@ jobs:
     needs: wasm-build
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: build
           path: ./
@@ -75,7 +75,7 @@ jobs:
     needs: wasm-build
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: build
           path: ./
@@ -92,7 +92,7 @@ jobs:
     needs: wasm-build
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: build
           path: ./
