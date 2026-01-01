@@ -1,10 +1,10 @@
 /* @ts-self-types="./zig_fmt.d.ts" */
-let wasm;
+let wasm, wasmModule;
 
 export default async function init(input) {
-	if (wasm !== undefined) return wasm;
+	if (wasm !== void 0) return wasm;
 
-	if (typeof input === "undefined") {
+	if (input === void 0) {
 		input = new URL("zig_fmt.wasm", import.meta.url);
 	}
 
@@ -12,8 +12,18 @@ export default async function init(input) {
 		input = fetch(input);
 	}
 
-	const { instance, module } = await load(await input, {});
+	const { instance, module } = await load(await input);
 
+	return finalize_init(instance, module);
+}
+
+export function initSync(module) {
+	if (wasm !== void 0) return wasm;
+
+	if (!(module instanceof WebAssembly.Module)) {
+		module = new WebAssembly.Module(module);
+	}
+	const instance = new WebAssembly.Instance(module);
 	return finalize_init(instance, module);
 }
 
@@ -48,7 +58,7 @@ async function load(module, imports) {
 }
 
 function finalize_init(instance, module) {
-	wasm = instance.exports;
+	wasm = instance.exports, wasmModule = module;
 	return wasm;
 }
 

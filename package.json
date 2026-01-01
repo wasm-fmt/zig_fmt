@@ -29,7 +29,10 @@
 	"exports": {
 		".": {
 			"types": "./zig_fmt.d.ts",
-			"node": "./zig_fmt_node.js",
+			"node": {
+				"types": "./zig_fmt_node.d.ts",
+				"default": "./zig_fmt_node.js"
+			},
 			"default": "./zig_fmt.js"
 		},
 		"./vite": {
