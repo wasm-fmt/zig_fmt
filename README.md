@@ -14,10 +14,6 @@ npm install @wasm-fmt/zig_fmt
 npx jsr add @fmt/zig-fmt
 ```
 
-```bash
-npm install @wasm-fmt/zig_fmt
-```
-
 # Usage
 
 ```javascript
