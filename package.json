@@ -3,7 +3,6 @@
 	"version": "0.15.0",
 	"description": "A wasm based zig formatter",
 	"scripts": {
-		"prepack": "npm run build",
 		"build": "zig build"
 	},
 	"repository": {

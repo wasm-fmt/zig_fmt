@@ -6,48 +6,9 @@ on:
       - "v*"
 
 jobs:
-  publish-npm:
-    if: startsWith(github.ref, 'refs/tags/v')
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: mlugg/setup-zig@v2
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".node-version"
-          registry-url: "https://registry.npmjs.org"
-
-      - run: |
-          npm publish --provenance
-
-  publish-github:
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: mlugg/setup-zig@v2
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".node-version"
-          registry-url: "https://npm.pkg.github.com"
-
-      - run: |
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  publish-jsr:
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: mlugg/setup-zig@v2
@@ -59,7 +20,73 @@ jobs:
         with:
           node-version-file: ".node-version"
 
-      - run: npm run build
+      - name: Build
+        run: npm run build
+
+      - name: Upload
+        uses: actions/upload-artifact@v6
+        with:
+          name: build
+          path: zig_fmt.wasm
+
+  publish-npm:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v7
+        with:
+          name: build
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish
+        run: npm publish --provenance
+
+  publish-github:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v7
+        with:
+          name: build
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-jsr:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v7
+        with:
+          name: build
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
 
       - name: Generate jsr.json from package.json
         run: |
@@ -74,23 +101,27 @@ jobs:
           require('fs').writeFileSync('jsr.json', JSON.stringify(jsr, null, '\t') + '\n');
           "
 
-      - run: npx jsr publish --allow-dirty
+      - name: Publish
+        run: npx jsr publish --allow-dirty
 
   publish-github-release:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    needs: build
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v6
-      - uses: mlugg/setup-zig@v2
+      - uses: actions/download-artifact@v7
+        with:
+          name: build
 
-      - name: Pre-release
-        run: |
-          npm pack
+      - name: Package
+        run: npm pack
 
       - name: Release
         uses: softprops/action-gh-release@92bc83c4214f780e84c7d2a85464a2ca05ebc2f0
         with:
           files: |
-            wasm-fmt-zig_fmt-*.tgz
+            *.tgz
+            *.wasm
