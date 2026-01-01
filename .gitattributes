@@ -1,9 +1,6 @@
 # Auto detect text files and perform LF normalization
-* text=auto
-*.js linguist-detectable=false
-*.ts linguist-detectable=false
-*.mjs linguist-detectable=false
-*.sh linguist-detectable=false
+* text=auto eol=lf
+*.js -linguist-detectable
+*.ts -linguist-detectable
 
-test_*/* linguist-detectable=false
-test_*/**/* linguist-detectable=false
+test_*/** -linguist-detectable
