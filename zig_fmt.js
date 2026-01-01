@@ -55,10 +55,6 @@ function finalize_init(instance, module) {
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
-function unpack(result) {
-	return [Number(result >> 32n), Number(result & 0xffffffffn)];
-}
-
 export function format(input) {
 	const bytes = encoder.encode(input);
 
@@ -69,14 +65,13 @@ export function format(input) {
 
 	new Uint8Array(wasm.memory.buffer, inputPtr, bytes.length).set(bytes);
 
-	const result = wasm.format(inputPtr, bytes.length);
+	const [outPtr, outLen] = wasm.format(inputPtr, bytes.length);
 
-	if (result === 0n) {
+	if (outPtr === 0) {
 		wasm.free_all();
 		throw new Error("Format failed");
 	}
 
-	const [outPtr, outLen] = unpack(result);
 	const output = decoder.decode(
 		new Uint8Array(wasm.memory.buffer, outPtr, outLen),
 	);

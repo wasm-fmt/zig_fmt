@@ -4,8 +4,7 @@
 	"description": "A wasm based zig formatter",
 	"scripts": {
 		"prepack": "npm run build",
-		"build": "zig build",
-		"postbuild": "cp zig-out/bin/zig_fmt.wasm ."
+		"build": "zig build"
 	},
 	"repository": {
 		"type": "git",

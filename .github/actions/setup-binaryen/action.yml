@@ -1,0 +1,91 @@
+name: 'Setup Binaryen'
+description: 'Install Binaryen from GitHub Releases'
+inputs:
+  version:
+    description: 'Binaryen version (e.g., 125 for version_125)'
+    required: false
+    default: '125'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Binaryen
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        VERSION="${{ inputs.version }}"
+        if [[ "$VERSION" =~ ^version_ ]]; then
+          VERSION_TAG="$VERSION"
+        else
+          VERSION_TAG="version_${VERSION}"
+        fi
+
+        # Determine target platform
+        if [ "${RUNNER_OS}" = "Linux" ]; then
+          if [ "${RUNNER_ARCH}" = "X64" ]; then
+            TARGET="x86_64-linux"
+          elif [ "${RUNNER_ARCH}" = "ARM64" ]; then
+            TARGET="aarch64-linux"
+          else
+            echo "Unsupported Linux architecture: ${RUNNER_ARCH}" >&2
+            exit 1
+          fi
+        elif [ "${RUNNER_OS}" = "Windows" ]; then
+          if [ "${RUNNER_ARCH}" = "X64" ]; then
+            TARGET="x86_64-windows"
+          else
+            echo "Unsupported Windows architecture: ${RUNNER_ARCH}" >&2
+            exit 1
+          fi
+        elif [ "${RUNNER_OS}" = "macOS" ]; then
+          if [ "${RUNNER_ARCH}" = "X64" ]; then
+            TARGET="x86_64-macos"
+          elif [ "${RUNNER_ARCH}" = "ARM64" ]; then
+            TARGET="arm64-macos"
+          else
+            echo "Unsupported macOS architecture: ${RUNNER_ARCH}" >&2
+            exit 1
+          fi
+        else
+          echo "Unsupported OS: ${RUNNER_OS}" >&2
+          exit 1
+        fi
+
+        # Setup cache
+        TOOL_PATH="${RUNNER_TOOL_CACHE}/binaryen/${VERSION_TAG}/${RUNNER_ARCH}"
+        TOOL_PATH_COMPLETE="${TOOL_PATH}.complete"
+
+        echo "${TOOL_PATH}/bin" >> ${GITHUB_PATH}
+
+        # Check cache
+        if [ -f "${TOOL_PATH_COMPLETE}" ]; then
+          echo "Binaryen ${VERSION_TAG} already cached at ${TOOL_PATH}"
+          exit 0
+        fi
+
+        # Download using gh CLI
+        ARCHIVE_NAME="binaryen-${VERSION_TAG}-${TARGET}.tar.gz"
+        DOWNLOAD_DIR="$(mktemp -d)"
+
+        echo "Downloading ${ARCHIVE_NAME}"
+        gh release download "${VERSION_TAG}" \
+          --repo WebAssembly/binaryen \
+          --pattern "${ARCHIVE_NAME}" \
+          --dir "${DOWNLOAD_DIR}"
+
+        # Extract
+        echo "Extracting to ${TOOL_PATH}"
+        mkdir -p "${TOOL_PATH}"
+        tar xzf "${DOWNLOAD_DIR}/${ARCHIVE_NAME}" \
+          -C "${TOOL_PATH}" \
+          --strip-components=1 \
+          binaryen-${VERSION_TAG}/bin/ \
+          binaryen-${VERSION_TAG}/lib/
+
+        # Cleanup
+        rm -rf "${DOWNLOAD_DIR}"
+
+        # Mark as complete
+        touch "${TOOL_PATH_COMPLETE}"
+
+        echo "Binaryen ${VERSION_TAG} installed at ${TOOL_PATH}"

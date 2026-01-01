@@ -35,7 +35,8 @@ export fn free_all() void {
 }
 
 /// Returns (ptr << 32) | len, or 0 on error.
-export fn format(input_ptr: [*]const u8, input_len: usize) u64 {
+/// Internal implementation, called by wrapper.
+export fn format_impl(input_ptr: [*]const u8, input_len: usize) u64 {
     const arena = getArena();
 
     const source = arena.allocSentinel(u8, input_len, 0) catch return 0;

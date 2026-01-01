@@ -17,6 +17,21 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(exe);
 
+    const wasm_merge = b.addSystemCommand(&.{
+        "wasm-merge",
+        "--enable-bulk-memory-opt",
+        "--enable-multivalue",
+        "zig-out/bin/zig_fmt.wasm",
+        "zig_fmt",
+        "src/binding.wat",
+        "binding",
+        "-o",
+        "zig_fmt.wasm",
+    });
+    wasm_merge.step.dependOn(&exe.step);
+    const install_step = b.getInstallStep();
+    install_step.dependOn(&wasm_merge.step);
+
     const update = b.option(bool, "update", "Update snapshot expectations") orelse false;
 
     // Native tests (runs on host, not wasm)
