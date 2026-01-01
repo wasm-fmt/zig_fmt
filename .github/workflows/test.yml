@@ -6,6 +6,7 @@ on:
       - "*"
   pull_request:
     types: ["opened", "reopened", "synchronize"]
+  workflow_dispatch:
 
 jobs:
   zig-fmt:
@@ -30,6 +31,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: mlugg/setup-zig@v2
+      - uses: ./.github/actions/setup-binaryen
+        with:
+          version: "125"
 
       - uses: actions/setup-node@v6
         with:
