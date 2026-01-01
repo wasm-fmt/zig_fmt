@@ -1,7 +1,18 @@
 [![Test](https://github.com/wasm-fmt/zig_fmt/actions/workflows/test.yml/badge.svg)](https://github.com/wasm-fmt/zig_fmt/actions/workflows/test.yml)
-[![npm](https://img.shields.io/npm/v/@wasm-fmt/zig_fmt)](https://www.npmjs.com/package/@wasm-fmt/zig_fmt)
 
 # Install
+
+[![npm](https://img.shields.io/npm/v/@wasm-fmt/zig_fmt?color=ec915c)](https://www.npmjs.com/package/@wasm-fmt/zig_fmt)
+
+```bash
+npm install @wasm-fmt/zig_fmt
+```
+
+[![jsr.io](https://jsr.io/badges/@fmt/zig-fmt?color=ec915c)](https://jsr.io/@fmt/zig-fmt)
+
+```bash
+npx jsr add @fmt/zig-fmt
+```
 
 ```bash
 npm install @wasm-fmt/zig_fmt
