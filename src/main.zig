@@ -34,18 +34,20 @@ export fn free_all() void {
     }
 }
 
-/// Returns (ptr << 32) | len, or 0 on error.
-/// Internal implementation, called by wrapper.
-export fn format_impl(input_ptr: [*]const u8, input_len: usize) u64 {
+/// Data layout: [u32: length][u8... data]
+/// Returns pointer to formatted output or null on error.
+export fn format(input_ptr: [*]const u8) ?[*]u8 {
     const arena = getArena();
 
-    const source = arena.allocSentinel(u8, input_len, 0) catch return 0;
-    @memcpy(source, input_ptr[0..input_len]);
+    const input_len = std.mem.readInt(u32, input_ptr[0..4], .little);
+    const source = arena.allocSentinel(u8, input_len, 0) catch return null;
+    @memcpy(source, input_ptr[4 .. 4 + input_len]);
 
-    const output = formatSource(arena, source) catch return 0;
+    const output = formatSource(arena, source) catch return null;
 
-    // wasm32 uses 32-bit pointers; on native this will fail at comptime
-    const ptr = @as(u32, @intCast(@intFromPtr(output.ptr)));
-    const len = @as(u32, @intCast(output.len));
-    return (@as(u64, ptr) << 32) | len;
+    const result = arena.alloc(u8, 4 + output.len) catch return null;
+    std.mem.writeInt(u32, result[0..4], @intCast(output.len), .little);
+    @memcpy(result[4..], output);
+
+    return result.ptr;
 }

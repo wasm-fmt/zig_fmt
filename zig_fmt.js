@@ -65,27 +65,31 @@ function finalize_init(instance, module) {
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
-export function format(input) {
-	const bytes = encoder.encode(input);
-
-	const inputPtr = wasm.alloc(bytes.length);
-	if (inputPtr === 0) {
+function writeString(str) {
+	const bytes = encoder.encode(str);
+	const ptr = wasm.alloc(4 + bytes.length);
+	if (ptr === 0) {
 		throw new Error("Failed to allocate memory");
 	}
+	new DataView(wasm.memory.buffer).setUint32(ptr, bytes.length, true);
+	new Uint8Array(wasm.memory.buffer, ptr + 4, bytes.length).set(bytes);
+	return ptr;
+}
 
-	new Uint8Array(wasm.memory.buffer, inputPtr, bytes.length).set(bytes);
-
-	const [outPtr, outLen] = wasm.format(inputPtr, bytes.length);
-
-	if (outPtr === 0) {
-		wasm.free_all();
+function readString(ptr) {
+	if (ptr === 0) {
 		throw new Error("Format failed");
 	}
+	const len = new DataView(wasm.memory.buffer).getUint32(ptr, true);
+	return decoder.decode(new Uint8Array(wasm.memory.buffer, ptr + 4, len));
+}
 
-	const output = decoder.decode(
-		new Uint8Array(wasm.memory.buffer, outPtr, outLen),
-	);
-
-	wasm.free_all();
-	return output;
+export function format(input) {
+	const in_ptr = writeString(input);
+	try {
+		const out_ptr = wasm.format(in_ptr);
+		return readString(out_ptr);
+	} finally {
+		wasm.free_all();
+	}
 }

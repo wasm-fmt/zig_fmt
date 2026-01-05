@@ -15,7 +15,9 @@ export type SyncInitInput = BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly format: (a: number, b: number) => [number, number];
+  readonly format: (ptr: number) => number;
+  readonly alloc: (len: number) => number;
+  readonly free_all: () => void;
 }
 
 /**

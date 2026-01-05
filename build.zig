@@ -15,22 +15,10 @@ pub fn build(b: *std.Build) void {
     exe.entry = .disabled;
     exe.rdynamic = true;
 
-    b.installArtifact(exe);
+    const copy_step = b.addInstallFile(exe.getEmittedBin(), "../zig_fmt.wasm");
+    b.getInstallStep().dependOn(&copy_step.step);
 
-    const wasm_merge = b.addSystemCommand(&.{
-        "wasm-merge",
-        "--enable-bulk-memory-opt",
-        "--enable-multivalue",
-        "zig-out/bin/zig_fmt.wasm",
-        "zig_fmt",
-        "src/binding.wat",
-        "binding",
-        "-o",
-        "zig_fmt.wasm",
-    });
-    wasm_merge.step.dependOn(&exe.step);
-    const install_step = b.getInstallStep();
-    install_step.dependOn(&wasm_merge.step);
+    b.installArtifact(exe);
 
     const update = b.option(bool, "update", "Update snapshot expectations") orelse false;
 
