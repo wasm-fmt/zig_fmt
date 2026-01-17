@@ -1,0 +1,22 @@
+{
+	"$schema": "https://jsr.io/schema/config-file.v1.json",
+	"name": "@fmt/zig-fmt",
+	"version": "0.15.2",
+	"exports": {
+		".": "./zig_fmt.js",
+		"./esm": "./zig_fmt_esm.js",
+		"./node": "./zig_fmt_node.js",
+		"./bundler": "./zig_fmt.js",
+		"./web": "./zig_fmt_web.js"
+	},
+	"publish": {
+		"include": [
+			"zig_fmt_*",
+			"zig_fmt.*",
+			"README.md"
+		],
+		"exclude": [
+			"!*.wasm"
+		]
+	}
+}

@@ -16,66 +16,71 @@ npx jsr add @fmt/zig-fmt
 
 # Usage
 
+## Node.js / Deno / Bun / Bundler
+
 ```javascript
-import init, { format } from "@wasm-fmt/zig_fmt";
+import { format } from "@wasm-fmt/zig_fmt";
 
-await init();
-
-const input = `
+const source = `
 const std = @import("std");
-
-pub fn main() !void 
-{
-  const stdout = std.io.getStdOut().writer();
-  var i: usize = 1;
-  while (i <= 16) : (i += 1) 
-    {
-        if (i % 15 == 0) 
-      {
-        try stdout.writeAll("ZiggZagg\\n");
-      } else 
-        if (i % 3 == 0) 
-      {
-        try stdout.writeAll("Zigg\\n");
-      } else 
-        if (i % 5 == 0) 
-      {
-        try stdout.writeAll("Zagg\\n");
-      }
-        else 
-      {
-        try stdout.print("{d}\\n", .{i});
-      }
-    }
+pub fn main() !void {
+    std.debug.print("Hello, 世界", .{});
 }
 `;
 
-const formatted = format(input);
+const formatted = format(source);
 console.log(formatted);
 ```
 
-For Vite users:
+## Web
 
-Add `"@wasm-fmt/zig_fmt"` to `optimizeDeps.exclude` in your vite config:
+For web environments, you need to initialize WASM module manually:
 
-```JSON
-{
-    "optimizeDeps": {
-        "exclude": ["@wasm-fmt/zig_fmt"]
-    }
+```javascript
+import init, { format } from "@wasm-fmt/zig_fmt/web";
+
+await init();
+
+const source = `
+const std = @import("std");
+pub fn main() !void {
+    std.debug.print("Hello, 世界", .{});
 }
+`;
+
+const formatted = format(source);
+console.log(formatted);
 ```
 
-<details>
-<summary>
-If you cannot change the vite config, you can use another import entry
-
-</summary>
+### Vite
 
 ```JavaScript
 import init, { format } from "@wasm-fmt/zig_fmt/vite";
 
+await init();
 // ...
 ```
 
-</details>
+## Entry Points
+
+- `.` - Auto-detects environment (Node.js uses node, Webpack uses bundler, default is ESM)
+- `./node` - Node.js environment (no init required)
+- `./esm` - ESM environments like Deno (no init required)
+- `./bundler` - Bundlers like Webpack (no init required)
+- `./web` - Web browsers (requires manual init)
+- `./vite` - Vite bundler (requires manual init)
+
+# Build from source
+
+```bash
+# 1. install Zig https://ziglang.org/download/
+
+# 2. clone this repo
+git clone https://github.com/wasm-fmt/zig_fmt.git
+
+# 3. build
+npm run build
+
+# 4. test
+npm run test:node
+```

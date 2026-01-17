@@ -1,16 +1,14 @@
 /* @ts-self-types="./zig_fmt.d.ts" */
-import { readFileSync } from "node:fs";
+// prettier-ignore
+import source wasmModule from "./zig_fmt.wasm";
 import { format as _format } from "./zig_fmt_binding.js";
-
-const wasmUrl = new URL("zig_fmt.wasm", import.meta.url);
-const wasmBytes = readFileSync(wasmUrl);
-const wasmModule = new WebAssembly.Module(wasmBytes);
 
 /**
  * @import * as WASM from "./zig_fmt.d.wasm.ts"
  */
 
 const instance = new WebAssembly.Instance(wasmModule);
+
 /**
  * @type {WASM}
  */

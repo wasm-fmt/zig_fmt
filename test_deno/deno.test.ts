@@ -1,25 +1,23 @@
-import init, { format } from "../zig_fmt.js";
+#!/usr/bin/env deno test --allow-read --parallel
+import { assertEquals } from "jsr:@std/assert";
+import { expandGlob } from "jsr:@std/fs";
+import { fromFileUrl } from "jsr:@std/path";
 
-import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
-import { walk } from "https://deno.land/std@0.201.0/fs/walk.ts";
-import { relative } from "https://deno.land/std@0.201.0/path/mod.ts";
+import { format } from "../zig_fmt_esm.js";
 
-await init();
+const test_root = fromFileUrl(new URL(import.meta.resolve("../test_data")));
 
-const test_root = new URL("../test_data", import.meta.url);
+for await (const { path: input_path, name: case_name } of expandGlob("**/*.input", { root: test_root })) {
+	if (case_name.startsWith(".")) {
+		Deno.test.ignore(case_name, () => {});
+		continue;
+	}
 
-for await (const entry of walk(test_root, {
-	includeDirs: false,
-	exts: ["input"],
-})) {
-	const expect_path = entry.path.replace(/input$/, "expect");
-	const input = Deno.readTextFileSync(entry.path);
+	const expect_path = input_path.replace(/input$/, "expect");
 
-	const expected = Deno.readTextFileSync(expect_path);
+	const [input, expected] = await Promise.all([Deno.readTextFile(input_path), Deno.readTextFile(expect_path)]);
 
-	const test_name = relative(test_root.pathname, entry.path);
-
-	Deno.test(test_name, () => {
+	Deno.test(case_name, () => {
 		const actual = format(input);
 		assertEquals(actual, expected);
 	});

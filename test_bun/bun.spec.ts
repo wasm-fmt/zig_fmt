@@ -1,28 +1,29 @@
+#!/usr/bin/env bun test
 import { Glob } from "bun";
 import { expect, test } from "bun:test";
-import path from "node:path";
-import init, { format } from "..";
+
+import init, { format } from "../zig_fmt_web.js";
 
 await init();
 
-const test_root = Bun.fileURLToPath(new URL("../test_data", import.meta.url));
-const glob = new Glob("**/*.input");
+const test_root = Bun.fileURLToPath(import.meta.resolve("../test_data"));
 
-for await (const input_path of glob.scan(test_root)) {
-	if (path.basename(input_path).startsWith(".")) {
+for await (const case_name of new Glob("**/*.input").scan({
+	cwd: test_root,
+	dot: true,
+})) {
+	if (case_name.startsWith(".")) {
+		test.skip(case_name, () => {});
 		continue;
 	}
 
-	const full_path = path.join(test_root, input_path);
-	const expect_path = full_path.replace(".input", ".expect");
+	const input_path = `${test_root}/${case_name}`;
+	const expect_path = input_path.replace(/input$/, "expect");
 
-	const [input, expected] = await Promise.all([
-		Bun.file(full_path).text(),
-		Bun.file(expect_path).text(),
-	]);
+	const [input, expected] = await Promise.all([Bun.file(input_path).text(), Bun.file(expect_path).text()]);
 
-	test(input_path, () => {
-		const actual = format(input, input_path);
+	test(case_name, () => {
+		const actual = format(input);
 		expect(actual).toBe(expected);
 	});
 }

@@ -1,40 +1,26 @@
 /**
- * @param {string} input
- * @returns {string}
+ * A wasm based zig formatter
+ *
+ * @example
+ * ```javascript
+ * import { format } from "@wasm-fmt/zig_fmt";
+ *
+ * const source = `
+ * const std = @import("std");
+ * pub fn main() !void {
+ *     std.debug.print("Hello, 世界", .{});
+ * }
+ * `;
+ *
+ * const formatted = format(source);
+ * ```
+ *
+ * @module
  */
-export function format(input: string): string;
-
-export type InitInput =
-	| RequestInfo
-	| URL
-	| Response
-	| BufferSource
-	| WebAssembly.Module;
-
-export type SyncInitInput = BufferSource | WebAssembly.Module;
-
-export interface InitOutput {
-  readonly memory: WebAssembly.Memory;
-  readonly format: (ptr: number) => number;
-  readonly alloc: (len: number) => number;
-  readonly free_all: () => void;
-}
 
 /**
- * If `init` is {RequestInfo} or {URL}, makes a request and 
- * for everything else, calls `WebAssembly.instantiate` directly.
- *
- * @param {InitInput | Promise<InitInput>} init
- *
- * @returns {Promise<void>}
+ * Formats a Zig source code.
+ * @param input - The Zig source code to format
+ * @returns The formatted Zig source code
  */
-export default function init(init?: InitInput | Promise<InitInput>): Promise<InitOutput>;
-
-/**
-* Instantiates the given `module`, which can either be bytes or a precompiled `WebAssembly.Module`.
-*
-* @param {SyncInitInput} module - Passing `SyncInitInput` directly is deprecated.
-*
-* @returns {InitOutput}
-*/
-export function initSync(module: SyncInitInput): InitOutput;
+export declare function format(input: string): string;

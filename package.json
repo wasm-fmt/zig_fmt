@@ -3,7 +3,13 @@
 	"version": "0.15.2",
 	"description": "A wasm based zig formatter",
 	"scripts": {
-		"build": "zig build"
+		"build": "zig build",
+		"fmt:zig": "zig fmt .",
+		"fmt:dprint": "dprint fmt",
+		"test:node": "node --test test_node/*.mjs",
+		"test:deno": "deno test test_deno --allow-read",
+		"test:bun": "bun test test_bun",
+		"version": "node ./scripts/sync_version.js && git add ."
 	},
 	"repository": {
 		"type": "git",
@@ -23,21 +29,36 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "zig_fmt.js",
-	"types": "zig_fmt.d.ts",
 	"type": "module",
 	"exports": {
 		".": {
 			"types": "./zig_fmt.d.ts",
-			"node": {
-				"types": "./zig_fmt_node.d.ts",
-				"default": "./zig_fmt_node.js"
-			},
+			"webpack": "./zig_fmt.js",
+			"deno": "./zig_fmt.js",
+			"bun": "./zig_fmt_node.js",
+			"module-sync": "./zig_fmt_node.js",
+			"node": "./zig_fmt_node.js",
+			"default": "./zig_fmt_esm.js"
+		},
+		"./esm": {
+			"types": "./zig_fmt.d.ts",
+			"default": "./zig_fmt_esm.js"
+		},
+		"./node": {
+			"types": "./zig_fmt.d.ts",
+			"default": "./zig_fmt_node.js"
+		},
+		"./bundler": {
+			"types": "./zig_fmt.d.ts",
 			"default": "./zig_fmt.js"
 		},
+		"./web": {
+			"types": "./zig_fmt_web.d.ts",
+			"default": "./zig_fmt_web.js"
+		},
 		"./vite": {
-			"types": "./zig_fmt.d.ts",
-			"default": "./vite.js"
+			"types": "./zig_fmt_web.d.ts",
+			"default": "./zig_fmt_vite.js"
 		},
 		"./package.json": "./package.json",
 		"./*": "./*"

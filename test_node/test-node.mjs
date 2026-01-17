@@ -1,31 +1,27 @@
+#!/usr/bin/env node --test
 import assert from "node:assert/strict";
-import fs from "node:fs/promises";
+import { glob, readFile } from "node:fs/promises";
 import { basename } from "node:path";
-import { chdir } from "node:process";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import init, { format } from "../zig_fmt_node.js";
-
-await init();
+import { format } from "../zig_fmt_node.js";
 
 const test_root = fileURLToPath(import.meta.resolve("../test_data"));
-chdir(test_root);
 
-for await (const input_path of fs.glob("**/*.input")) {
-	if (basename(input_path).startsWith(".")) {
+for await (const case_name of glob("**/*.input", { cwd: test_root })) {
+	if (basename(case_name).startsWith(".")) {
+		test(case_name, { skip: true }, () => {});
 		continue;
 	}
 
-	const expect_path = input_path.slice(0, -".input".length) + ".expect";
+	const input_path = `${test_root}/${case_name}`;
+	const expect_path = input_path.replace(/\.input$/, ".expect");
 
-	const [input, expected] = await Promise.all([
-		fs.readFile(input_path, "utf-8"),
-		fs.readFile(expect_path, "utf-8"),
-	]);
+	const [input, expected] = await Promise.all([readFile(input_path, "utf-8"), readFile(expect_path, "utf-8")]);
 
-	test(input_path, () => {
-		const actual = format(input, input_path);
+	test(case_name, () => {
+		const actual = format(input);
 		assert.equal(actual, expected);
 	});
 }
