@@ -18,10 +18,11 @@ test "format test_data files" {
 
     while (try iter.next()) |entry| {
         if (entry.kind != .file) continue;
-        if (!std.mem.endsWith(u8, entry.name, ".input")) continue;
+        const is_zig = std.mem.endsWith(u8, entry.name, ".zig");
+        const is_zon = std.mem.endsWith(u8, entry.name, ".zon");
+        if (!is_zig and !is_zon) continue;
 
-        const basename = entry.name[0 .. entry.name.len - ".input".len];
-        const expect_name = try std.fmt.allocPrint(allocator, "{s}.expect", .{basename});
+        const expect_name = try std.fmt.allocPrint(allocator, "{s}.expect", .{entry.name});
         defer allocator.free(expect_name);
 
         // Read input file (with sentinel for Ast.parse)
@@ -30,9 +31,10 @@ test "format test_data files" {
             return err;
         };
         defer allocator.free(input);
+        const mode: std.zig.Ast.Mode = if (is_zon) .zon else .zig;
 
         // Format
-        const actual = main.formatSource(allocator, input) catch |err| {
+        const actual = main.formatSource(allocator, input, mode) catch |err| {
             std.debug.print("Failed to format {s}: {}\n", .{ entry.name, err });
             return err;
         };

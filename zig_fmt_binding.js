@@ -5,12 +5,14 @@
 /**
  * @param {WASM} wasm
  * @param {string} source
+ * @param {string} [filepath]
  * @return {string}
  */
-export function format(wasm, source) {
+export function format(wasm, source, filepath) {
 	const in_ptr = writeString(wasm, source);
+	const is_zon = filepath && filepath.toLowerCase().endsWith(".zon");
 	try {
-		const out_ptr = wasm.format(in_ptr);
+		const out_ptr = wasm.format(in_ptr, is_zon ? 1 : 0);
 		return readString(wasm, out_ptr);
 	} finally {
 		wasm.free_all();

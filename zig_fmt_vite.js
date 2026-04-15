@@ -27,6 +27,6 @@ export function initSync(module) {
 	return finalize_init(instance, module);
 }
 
-export function format(source, path, options) {
-	return _format(wasm, source, path, options);
+export function format(source, filepath) {
+	return _format(wasm, source, filepath);
 }

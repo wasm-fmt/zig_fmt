@@ -20,7 +20,8 @@
 
 /**
  * Formats a Zig source code.
- * @param input - The Zig source code to format
- * @returns The formatted Zig source code
+ * @param {string} input - The Zig source code to format
+ * @param {string} [filename] - Optional file name used to infer format rules (for example, .zig or .zon)
+ * @returns {string} The formatted Zig source code
  */
-export declare function format(input: string): string;
+export declare function format(input: string, filename?: string): string;

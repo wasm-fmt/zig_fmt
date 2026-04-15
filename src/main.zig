@@ -14,8 +14,8 @@ fn getArena() std.mem.Allocator {
 }
 
 /// Core formatting function.
-pub fn formatSource(allocator: std.mem.Allocator, source: [:0]const u8) ![]const u8 {
-    var tree = try std.zig.Ast.parse(allocator, source, .zig);
+pub fn formatSource(allocator: std.mem.Allocator, source: [:0]const u8, mode: std.zig.Ast.Mode) ![]const u8 {
+    var tree = try std.zig.Ast.parse(allocator, source, mode);
     defer tree.deinit(allocator);
     return try tree.renderAlloc(allocator);
 }
@@ -36,14 +36,14 @@ export fn free_all() void {
 
 /// Data layout: [u32: length][u8... data]
 /// Returns pointer to formatted output or null on error.
-export fn format(input_ptr: [*]const u8) ?[*]u8 {
+export fn format(input_ptr: [*]const u8, is_zon: bool) ?[*]u8 {
     const arena = getArena();
 
     const input_len = std.mem.readInt(u32, input_ptr[0..4], .little);
     const source = arena.allocSentinel(u8, input_len, 0) catch return null;
     @memcpy(source, input_ptr[4 .. 4 + input_len]);
 
-    const output = formatSource(arena, source) catch return null;
+    const output = formatSource(arena, source, if (is_zon) .zon else .zig) catch return null;
 
     const result = arena.alloc(u8, 4 + output.len) catch return null;
     std.mem.writeInt(u32, result[0..4], @intCast(output.len), .little);

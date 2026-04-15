@@ -7,18 +7,18 @@ import { format } from "../zig_fmt_esm.js";
 
 const test_root = fromFileUrl(new URL(import.meta.resolve("../test_data")));
 
-for await (const { path: input_path, name: case_name } of expandGlob("**/*.input", { root: test_root })) {
+for await (const { path: input_path, name: case_name } of expandGlob("**/*.{zig,zon}", { root: test_root })) {
 	if (case_name.startsWith(".")) {
 		Deno.test.ignore(case_name, () => {});
 		continue;
 	}
 
-	const expect_path = input_path.replace(/input$/, "expect");
+	const expect_path = `${input_path}.expect`;
 
 	const [input, expected] = await Promise.all([Deno.readTextFile(input_path), Deno.readTextFile(expect_path)]);
 
 	Deno.test(case_name, () => {
-		const actual = format(input);
+		const actual = format(input, input_path);
 		assertEquals(actual, expected);
 	});
 }

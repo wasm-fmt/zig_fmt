@@ -80,6 +80,6 @@ export default async function initAsync(init_input) {
 	return finalize_init(instance, module);
 }
 
-export function format(source) {
-	return _format(wasm, source);
+export function format(source, filepath) {
+	return _format(wasm, source, filepath);
 }

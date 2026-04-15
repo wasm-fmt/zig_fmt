@@ -9,19 +9,19 @@ import { format } from "../zig_fmt_node.js";
 
 const test_root = fileURLToPath(import.meta.resolve("../test_data"));
 
-for await (const case_name of glob("**/*.input", { cwd: test_root })) {
+for await (const case_name of glob("**/*.{zig,zon}", { cwd: test_root })) {
 	if (basename(case_name).startsWith(".")) {
 		test(case_name, { skip: true }, () => {});
 		continue;
 	}
 
 	const input_path = `${test_root}/${case_name}`;
-	const expect_path = input_path.replace(/\.input$/, ".expect");
+	const expect_path = `${input_path}.expect`;
 
 	const [input, expected] = await Promise.all([readFile(input_path, "utf-8"), readFile(expect_path, "utf-8")]);
 
 	test(case_name, () => {
-		const actual = format(input);
+		const actual = format(input, input_path);
 		assert.equal(actual, expected);
 	});
 }

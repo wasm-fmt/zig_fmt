@@ -16,6 +16,6 @@ const instance = new WebAssembly.Instance(wasmModule);
  */
 const wasm = instance.exports;
 
-export function format(source) {
-	return _format(wasm, source);
+export function format(source, filepath) {
+	return _format(wasm, source, filepath);
 }

@@ -8,7 +8,7 @@ await init();
 
 const test_root = Bun.fileURLToPath(import.meta.resolve("../test_data"));
 
-for await (const case_name of new Glob("**/*.input").scan({
+for await (const case_name of new Glob("**/*.{zig,zon}").scan({
 	cwd: test_root,
 	dot: true,
 })) {
@@ -18,12 +18,12 @@ for await (const case_name of new Glob("**/*.input").scan({
 	}
 
 	const input_path = `${test_root}/${case_name}`;
-	const expect_path = input_path.replace(/input$/, "expect");
+	const expect_path = `${input_path}.expect`;
 
 	const [input, expected] = await Promise.all([Bun.file(input_path).text(), Bun.file(expect_path).text()]);
 
 	test(case_name, () => {
-		const actual = format(input);
+		const actual = format(input, input_path);
 		expect(actual).toBe(expected);
 	});
 }
