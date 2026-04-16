@@ -1,6 +1,6 @@
 {
 	"name": "@wasm-fmt/zig_fmt",
-	"version": "0.15.2",
+	"version": "0.16.0",
 	"description": "A wasm based zig formatter",
 	"scripts": {
 		"build": "zig build",
