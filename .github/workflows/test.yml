@@ -13,7 +13,7 @@ jobs:
         name: Zig fmt
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: mlugg/setup-zig@v2
             - run: zig fmt --check src/*.zig
 
@@ -21,7 +21,7 @@ jobs:
         name: Zig test
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: mlugg/setup-zig@v2
             - run: zig build test
 
@@ -29,7 +29,7 @@ jobs:
         name: Wasm build
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: mlugg/setup-zig@v2
             - uses: actions/setup-node@v6
               with:
@@ -55,7 +55,7 @@ jobs:
                 os: [ubuntu-latest, macos-latest, windows-latest]
                 runtime: [node, deno, bun]
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: actions/download-artifact@v8
               with:
                   name: build
